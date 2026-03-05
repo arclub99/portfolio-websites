@@ -1,3 +1,8 @@
+#Main-title h1{
+  text-align: center;
+  font-size: 32px;
+  font-family:'Helvetica Neue', sans-serif;
+}
 .course-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -7,29 +12,23 @@
 
 .course-card {
   text-decoration: none;
-  color: black;
-  transition: 0.3s;
   display: block;
-  border-radius: 16px;
+  border-radius: 5px;
   overflow: hidden;
   background: white;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  
 }
 
 .course-card img {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 5px;
   height: 255px;
   object-fit: cover;
 
 }
 
-.course-card:hover {
-  transform: translateY(-5px);
-   transform: translateY(-6px) scale(1.00);
-  box-shadow: 0 10px 10px rgba(0,0,0,0.12);
-}
+
 .course-card a {
   text-decoration: none;
 }

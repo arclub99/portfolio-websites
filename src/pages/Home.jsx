@@ -7,7 +7,17 @@ import "../CourseCard.css";
 
 const Home = () => {
   return (
-    <div className="course-grid">
+    <>
+      <div id="Main-title">
+        <h1> 
+          Welcome to My Portfolio
+        </h1>
+        <p style={{ textAlign: "center", margin: "0 0 32px 0" }}>
+          Explore my collection of portfolio websites showcasing my work and
+          projects.
+        </p>
+      </div>
+      <div className="course-grid">
       <CourseCard
         image={img1}
         title="Muenchpn Marathon"
@@ -28,7 +38,9 @@ const Home = () => {
         title="Kikenokivabe"
         link="https://kikenokivabe.com/"
       />
-    </div>
+      
+      </div>
+    </>
   );
 };
 

@@ -1,8 +1,8 @@
 import React from "react";
 import CourseCard from "../components/CourseCard";
-import img1 from "../assets/img1.jpg";
-import img2 from "../assets/img2.jpg";
-import img3 from "../assets/img3.jpg";
+import img1 from "../assets/Muenchen-Marathon-Website_-Mockup.webp";
+import img2 from "../assets/Ki-Keno-Kivabe-Mockup.webp";
+import img3 from "../assets/Services-Creativite-Quebec.webp";
 import "../CourseCard.css";
 
 const Home = () => {

@@ -17,12 +17,16 @@ const Home = () => {
         image={img2}
         title="Kikenokivabe"
         link="https://kikenokivabe.com/"
-         
       />
       <CourseCard
         image={img3}
         title="services.creativite.quebec"
         link="https://services.creativite.quebec/"
+      />
+      <CourseCard
+        image={img2}
+        title="Kikenokivabe"
+        link="https://kikenokivabe.com/"
       />
     </div>
   );

@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/portfolio-websites/static/css/main.82fb0b43.css",
+    "main.css": "/portfolio-websites/static/css/main.50713bc7.css",
     "main.js": "/portfolio-websites/static/js/main.988aadeb.js",
     "static/js/453.2adcbe1e.chunk.js": "/portfolio-websites/static/js/453.2adcbe1e.chunk.js",
     "static/media/Muenchen-Marathon-Website_-Mockup.webp": "/portfolio-websites/static/media/Muenchen-Marathon-Website_-Mockup.361493de7e0b7b91cc61.webp",
     "static/media/Ki-Keno-Kivabe-Mockup.webp": "/portfolio-websites/static/media/Ki-Keno-Kivabe-Mockup.6dd434bbb02b64cdd9fc.webp",
     "static/media/Services-Creativite-Quebec.webp": "/portfolio-websites/static/media/Services-Creativite-Quebec.d76b9578a7b4d6bebb67.webp",
     "index.html": "/portfolio-websites/index.html",
-    "main.82fb0b43.css.map": "/portfolio-websites/static/css/main.82fb0b43.css.map",
+    "main.50713bc7.css.map": "/portfolio-websites/static/css/main.50713bc7.css.map",
     "main.988aadeb.js.map": "/portfolio-websites/static/js/main.988aadeb.js.map",
     "453.2adcbe1e.chunk.js.map": "/portfolio-websites/static/js/453.2adcbe1e.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.82fb0b43.css",
+    "static/css/main.50713bc7.css",
     "static/js/main.988aadeb.js"
   ]
 }

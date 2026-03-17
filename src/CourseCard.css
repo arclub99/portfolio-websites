@@ -1,39 +1,70 @@
+#Main-title {
+  padding: 60px 20px 0px;
+}
+
 #Main-title h1{
   text-align: center;
-  font-size: 32px;
+  font-size: 48px;
   font-family:'Helvetica Neue', sans-serif;
+  color: #ffffff;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+  letter-spacing: -1px;
 }
+
+#Main-title p{
+  text-align: center;
+  font-size: 18px;
+  margin: 0 0 32px 0;
+  color: #a0a0a0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+} 
 .course-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  padding:20px;
+  gap: 30px;
+  padding: 40px 20px;
+  max-width: 1920px;
+  margin: 0 auto;
 }
 
 .course-card {
   text-decoration: none;
   display: block;
-  border-radius: 5px;
+  border-radius: 12px;
   overflow: hidden;
-  background: white;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
-  
+  backdrop-filter: blur(10px);
+}
+
+.course-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.5);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 212, 255, 0.1);
 }
 
 .course-card img {
   width: 100%;
-  border-radius: 5px;
+  border-radius: 12px 12px 0 0;
   height: 255px;
   object-fit: cover;
-
 }
-
 
 .course-card a {
   text-decoration: none;
+  color: inherit;
 }
 .course-card a h2 {
-  padding: 0px 20px;
+  padding: 16px 20px;
+  color: #ffffff;
+  font-size: 18px;
+  margin: 0;
+  font-weight: 500;
 }
 
 .card-image-wrapper {
@@ -61,9 +92,54 @@
   margin: 0;
 }
 
+/* Filter Tabs */
+.filter-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 30px 20px;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 10px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 25px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #a0a0a0;
+  backdrop-filter: blur(10px);
+}
+
+.tab-button:hover {
+  border-color: rgba(0, 212, 255, 0.5);
+  color: #00d4ff;
+  background-color: rgba(0, 212, 255, 0.1);
+}
+
+.tab-button.active {
+  background-color: rgba(0, 212, 255, 0.2);
+  border-color: #00d4ff;
+  color: #00d4ff;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .course-grid {
     grid-template-columns: 1fr;
+  }
+
+  .filter-tabs {
+    margin: 20px 10px;
+    gap: 10px;
+  }
+
+  .tab-button {
+    padding: 8px 16px;
+    font-size: 14px;
   }
 }

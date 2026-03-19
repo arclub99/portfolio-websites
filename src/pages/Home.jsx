@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import CourseCard from "../components/CourseCard";
-import img1 from "../assets/Muenchen-Marathon-Website_-Mockup.webp";
-import img2 from "../assets/Ki-Keno-Kivabe-Mockup.webp";
-import img3 from "../assets/Services-Creativite-Quebec.webp";
+// Thumbnails
+import thumb1 from "../assets/Muenchen-Marathon-thumb.webp";
+import thumb2 from "../assets/Ki-Keno-Kivabe-thumb.webp";
+import thumb3 from "../assets/Services-Creativite-Quebec-thumb.webp";
+import thumb4 from "../assets/Royal-moja-thumb.webp";
+// Mockups
+import mockup1 from "../assets/Munich-Marathon-mockup.webp";
+import mockup2 from "../assets/Ki-Keno-Kivabe-Mockup.webp";
+import mockup3 from "../assets/Services-Créativité-Québec-mockup.webp";
+import mockup4 from "../assets/Royal-Moja-mockup.webp";
 import "../CourseCard.css";
 
 const Home = () => {
@@ -11,37 +18,42 @@ const Home = () => {
   const courses = [
     {
       id: 1,
-      image: img1,
-      title: "Muenchpn Marathon",
+      image: thumb1,
+      hoverImage: mockup1,
+      title: "Munich Marathon",
       link: "https://www.muenchenmarathon.de/",
       category: "Elementor",
     },
     {
       id: 2,
-      image: img2,
+      image: thumb2,
+      hoverImage: mockup2,
       title: "Kikenokivabe",
       link: "https://kikenokivabe.com/",
       category: "Elementor",
     },
     {
-      id: 2,
-      image: img2,
+      id: 3,
+      image: thumb2,
+      hoverImage: mockup2,
       title: "Kikenokivabe",
       link: "https://kikenokivabe.com/",
       category: "Wp Backary",
     },
     {
-      id: 3,
-      image: img3,
-      title: "services.creativite.quebec",
+      id: 4,
+      image: thumb3,
+      hoverImage: mockup3,
+      title: "Services Créativité Québec",
       link: "https://services.creativite.quebec/",
       category: "DIVI",
     },
     {
-      id: 4,
-      image: img2,
-      title: "Kikenokivabe",
-      link: "https://kikenokivabe.com/",
+      id: 5,
+      image: thumb4,
+      hoverImage: mockup4,
+      title: "Royal Moja",
+      link: "https://example.com/royal-moja",
       category: "Custom",
     },
   ];
@@ -82,6 +94,7 @@ const Home = () => {
           <CourseCard
             key={course.id}
             image={course.image}
+            hoverImage={course.hoverImage}
             title={course.title}
             link={course.link}
             category={course.category}

@@ -1,18 +1,19 @@
 {
   "files": {
-    "main.css": "/portfolio-websites/static/css/main.9d63eb11.css",
-    "main.js": "/portfolio-websites/static/js/main.988aadeb.js",
+    "main.css": "/portfolio-websites/static/css/main.db1dd672.css",
+    "main.js": "/portfolio-websites/static/js/main.c63d6a72.js",
     "static/js/453.2adcbe1e.chunk.js": "/portfolio-websites/static/js/453.2adcbe1e.chunk.js",
-    "static/media/Muenchen-Marathon-Website_-Mockup.webp": "/portfolio-websites/static/media/Muenchen-Marathon-Website_-Mockup.361493de7e0b7b91cc61.webp",
-    "static/media/Ki-Keno-Kivabe-Mockup.webp": "/portfolio-websites/static/media/Ki-Keno-Kivabe-Mockup.6dd434bbb02b64cdd9fc.webp",
-    "static/media/Services-Creativite-Quebec.webp": "/portfolio-websites/static/media/Services-Creativite-Quebec.d76b9578a7b4d6bebb67.webp",
+    "static/media/Royal-Moja-mockup.webp": "/portfolio-websites/static/media/Royal-Moja-mockup.708ff2415c847ebbde1d.webp",
+    "static/media/Munich-Marathon-mockup.webp": "/portfolio-websites/static/media/Munich-Marathon-mockup.d4c880a0143d0b058399.webp",
+    "static/media/Ki-Keno-Kivabe-Mockup.webp": "/portfolio-websites/static/media/Ki-Keno-Kivabe-Mockup.5239320b0cee78d65dfc.webp",
+    "static/media/Services-Créativité-Québec-mockup.webp": "/portfolio-websites/static/media/Services-Créativité-Québec-mockup.e4e971373fa1c4893ea8.webp",
     "index.html": "/portfolio-websites/index.html",
-    "main.9d63eb11.css.map": "/portfolio-websites/static/css/main.9d63eb11.css.map",
-    "main.988aadeb.js.map": "/portfolio-websites/static/js/main.988aadeb.js.map",
+    "main.db1dd672.css.map": "/portfolio-websites/static/css/main.db1dd672.css.map",
+    "main.c63d6a72.js.map": "/portfolio-websites/static/js/main.c63d6a72.js.map",
     "453.2adcbe1e.chunk.js.map": "/portfolio-websites/static/js/453.2adcbe1e.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9d63eb11.css",
-    "static/js/main.988aadeb.js"
+    "static/css/main.db1dd672.css",
+    "static/js/main.c63d6a72.js"
   ]
 }

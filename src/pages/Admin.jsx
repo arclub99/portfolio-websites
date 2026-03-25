@@ -16,6 +16,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, db, storage } from "../firebase";
+import "./Admin.css";
 
 const ADMIN_EMAIL = "arclub99@gmail.com";
 
@@ -28,33 +29,9 @@ const initialForm = {
   hoverImg: "",
 };
 
-const inputStyle = {
-  width: "100%",
-  padding: "12px 14px",
-  borderRadius: "10px",
-  border: "1px solid #333",
-  background: "#111",
-  color: "#fff",
-  outline: "none",
-};
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "8px",
-  fontWeight: "600",
-};
-
-const buttonStyle = {
-  padding: "12px 16px",
-  borderRadius: "10px",
-  border: "none",
-  cursor: "pointer",
-  fontWeight: "700",
-};
-
 function Admin() {
   const [form, setForm] = useState(initialForm);
-  const categoryOptions = ["Elementor", "WP Bakery", "DIVI", "Custom"];
+  const categoryOptions = ["Elementor", "WPBakery", "DIVI", "Custom"];
   const [projects, setProjects] = useState([]);
   const [thumbFile, setThumbFile] = useState(null);
   const [hoverFile, setHoverFile] = useState(null);
@@ -62,6 +39,8 @@ function Admin() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [draggedId, setDraggedId] = useState(null);
+  const [currentPage, setCurrentPage] = useState("add");
 
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -100,12 +79,13 @@ function Admin() {
         id: item.id,
         ...item.data(),
       }));
-
+      // Order অনুযায়ী sort করি
+      data.sort((a, b) => (a.order || 0) - (b.order || 0));
       setProjects(data);
       setMessage(`Loaded ${data.length} cards`);
     } catch (error) {
       console.error("Error fetching projects:", error);
-      setMessage(`Projects load করতে সমস্যা হয়েছে: ${error.message}`);
+      setMessage(`Projects load করতে সমস্যা হয়েছে: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -117,7 +97,7 @@ function Admin() {
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error("Login error:", error);
-      setMessage(`Login করতে সমস্যা হয়েছে: ${error.message}`);
+      setMessage(`Login করতে সমস্যা হয়েছে: ${error.message}`);
     }
   };
 
@@ -127,7 +107,7 @@ function Admin() {
       setMessage("Signed out");
     } catch (error) {
       console.error("Logout error:", error);
-      setMessage(`Logout করতে সমস্যা হয়েছে: ${error.message}`);
+      setMessage(`Logout করতে সমস্যা হয়েছে: ${error.message}`);
     }
   };
 
@@ -170,7 +150,7 @@ function Admin() {
 
     try {
       setSaving(true);
-      setMessage("Saving শুরু হয়েছে...");
+      setMessage("Saving শুরু হয়েছে...");
 
       let thumbUrl = form.thumb;
       let hoverUrl = form.hoverImg;
@@ -210,7 +190,7 @@ function Admin() {
       await fetchProjects();
     } catch (error) {
       console.error("Save error:", error);
-      setMessage(`Save করতে সমস্যা হয়েছে: ${error.message}`);
+      setMessage(`Save করতে সমস্যা হয়েছে: ${error.message}`);
     } finally {
       setSaving(false);
     }
@@ -219,13 +199,13 @@ function Admin() {
   const handleEdit = (project) => {
     setEditingId(project.id);
     setForm({
-    title: project.title || "",
-    link: project.link || "",
-    category: project.category || "Elementor",
-    order: project.order ?? 0,
-    thumb: project.thumb || "",
-    hoverImg: project.hoverImg || "",
-  });
+      title: project.title || "",
+      link: project.link || "",
+      category: project.category || "Elementor",
+      order: project.order ?? 0,
+      thumb: project.thumb || "",
+      hoverImg: project.hoverImg || "",
+    });
     setThumbFile(null);
     setHoverFile(null);
     setMessage("");
@@ -255,8 +235,89 @@ function Admin() {
       }
     } catch (error) {
       console.error("Delete error:", error);
-      setMessage(`Delete করতে সমস্যা হয়েছে: ${error.message}`);
+      setMessage(`Delete করতে সমস্যা হয়েছে: ${error.message}`);
     }
+  };
+
+  const handleMoveOrder = async (id, direction) => {
+    if (!isAdmin) {
+      setMessage("আপনি admin নন");
+      return;
+    }
+
+    try {
+      setMessage("Order update হচ্ছে...");
+      const projectIndex = projects.findIndex((p) => p.id === id);
+
+      if (projectIndex === -1) return;
+
+      const currentOrder = projects[projectIndex].order || 0;
+      const newOrder = direction === "up" ? currentOrder - 1 : currentOrder + 1;
+
+      await updateDoc(doc(db, "portfolio", id), {
+        order: newOrder,
+        updatedAt: serverTimestamp(),
+      });
+
+      setMessage(`Order updated successfully (New: ${newOrder})`);
+      await fetchProjects();
+    } catch (error) {
+      console.error("Order update error:", error);
+      setMessage(`Order update করতে সমস্যা হয়েছে: ${error.message}`);
+    }
+  };
+
+  const handleDragStart = (e, projectId) => {
+    setDraggedId(projectId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = async (e, targetId) => {
+    e.preventDefault();
+
+    if (!draggedId || draggedId === targetId || !isAdmin) {
+      setDraggedId(null);
+      return;
+    }
+
+    try {
+      setMessage("Reordering cards...");
+      const draggedIndex = projects.findIndex((p) => p.id === draggedId);
+      const targetIndex = projects.findIndex((p) => p.id === targetId);
+
+      if (draggedIndex === -1 || targetIndex === -1) return;
+
+      const draggedOrder = projects[draggedIndex].order || 0;
+      const targetOrder = projects[targetIndex].order || 0;
+
+      // আপডেট উভয় কার্ডের order
+      await updateDoc(doc(db, "portfolio", draggedId), {
+        order: targetOrder,
+        updatedAt: serverTimestamp(),
+      });
+
+      await updateDoc(doc(db, "portfolio", targetId), {
+        order: draggedOrder,
+        updatedAt: serverTimestamp(),
+      });
+
+      setMessage("Order updated successfully");
+      await fetchProjects();
+    } catch (error) {
+      console.error("Drag drop error:", error);
+      setMessage(`Reorder করতে সমস্যা হয়েছে: ${error.message}`);
+    } finally {
+      setDraggedId(null);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
   };
 
   const thumbPreview = thumbFile
@@ -269,7 +330,7 @@ function Admin() {
 
   if (authLoading) {
     return (
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px", color: "#fff" }}>
+      <div className="login-box">
         <h1>Admin</h1>
         <p>Checking login...</p>
       </div>
@@ -278,27 +339,16 @@ function Admin() {
 
   if (!user) {
     return (
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px", color: "#fff" }}>
-        <div
-          style={{
-            background: "#0d0d0d",
-            border: "1px solid #222",
-            borderRadius: "16px",
-            padding: "30px",
-          }}
-        >
-          <h1 style={{ marginBottom: "10px" }}>Admin Login</h1>
-          <p style={{ marginBottom: "20px", color: "#bbb" }}>
-            Admin page use করতে হলে Google account দিয়ে login করুন।
+      <div className="login-box">
+        <div className="auth-card">
+          <h1>Admin Login</h1>
+          <p>
+            Admin page use করতে হলে Google account দিয়ে login করুন।
           </p>
 
           <button
             onClick={handleLogin}
-            style={{
-              ...buttonStyle,
-              background: "#2563eb",
-              color: "#fff",
-            }}
+            className="btn btn-primary"
           >
             Sign in with Google
           </button>
@@ -313,30 +363,19 @@ function Admin() {
 
   if (!isAdmin) {
     return (
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px", color: "#fff" }}>
-        <div
-          style={{
-            background: "#0d0d0d",
-            border: "1px solid #222",
-            borderRadius: "16px",
-            padding: "30px",
-          }}
-        >
-          <h1 style={{ marginBottom: "10px" }}>Not Authorized</h1>
-          <p style={{ marginBottom: "12px", color: "#bbb" }}>
+      <div className="login-box">
+        <div className="auth-card">
+          <h1>Not Authorized</h1>
+          <p>
             এই account admin হিসেবে allowed না।
           </p>
-          <p style={{ marginBottom: "20px", color: "#bbb" }}>
+          <p>
             Logged in as: <strong>{user.email}</strong>
           </p>
 
           <button
             onClick={handleLogout}
-            style={{
-              ...buttonStyle,
-              background: "#dc2626",
-              color: "#fff",
-            }}
+            className="btn btn-danger"
           >
             Sign out
           </button>
@@ -346,312 +385,309 @@ function Admin() {
   }
 
   return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px", color: "#fff" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "12px",
-          flexWrap: "wrap",
-          marginBottom: "20px",
-        }}
-      >
-        <div>
-          <h1 style={{ marginBottom: "8px" }}>
-            {editingId ? "Update Portfolio Card" : "Add New Portfolio Card"}
-          </h1>
-          <p style={{ color: "#bbb", marginBottom: "6px" }}>
-            Logged in as: {user.email}
-          </p>
-          <p style={{ color: "#bbb" }}>
-            এখান থেকে title, link, category, thumbnail, hover image add/update করতে পারবেন।
-          </p>
+    <div className="admin-wrapper">
+      {/* Sidebar */}
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-brand">
+          <h2>Portfolio</h2>
         </div>
 
-        <button
-          onClick={handleLogout}
-          style={{
-            ...buttonStyle,
-            background: "#dc2626",
-            color: "#fff",
-          }}
-        >
-          Sign out
-        </button>
-      </div>
+        <ul className="admin-sidebar-menu">
+          <li className="admin-menu-title">Portfolio Card</li>
+          <li>
+            <button
+              className={`admin-menu-item ${currentPage === "add" ? "active" : ""}`}
+              onClick={() => {
+                setCurrentPage("add");
+                resetForm();
+              }}
+            >
+              + Add new card
+            </button>
+          </li>
+          <li>
+            <button
+              className={`admin-menu-item ${currentPage === "all" ? "active" : ""}`}
+              onClick={() => setCurrentPage("all")}
+            >
+              All cards
+            </button>
+          </li>
+        </ul>
+      </aside>
 
-      {message && (
-        <p style={{ marginBottom: "16px", color: "#facc15" }}>{message}</p>
-      )}
+      {/* Main Content */}
+      <main className="admin-main">
+        <div className="admin-container">
+          {/* Header */}
+          <div className="admin-header">
+            <div className="admin-header-content">
+              <h1>
+                {currentPage === "add"
+                  ? editingId
+                    ? "Update Portfolio Card"
+                    : "Add New Portfolio Card"
+                  : "All Portfolio Cards"}
+              </h1>
+              <p>
+                Logged in as: {user.email}
+              </p>
+            </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "grid",
-          gap: "16px",
-          background: "#0d0d0d",
-          border: "1px solid #222",
-          borderRadius: "16px",
-          padding: "20px",
-          marginBottom: "30px",
-        }}
-      >
-        <div>
-          <label style={labelStyle}>Project Title</label>
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Ki Keno Kivabe"
-            style={inputStyle}
-          />
-        </div>
-
-        <div>
-          <label style={labelStyle}>Project Link</label>
-          <input
-            type="text"
-            name="link"
-            value={form.link}
-            onChange={handleChange}
-            placeholder="https://example.com"
-            style={inputStyle}
-          />
-        </div>
-
-        <div>
-          <label style={labelStyle}>Category</label>
-          <input
-            type="text"
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            placeholder="Elementor / DIVI / Custom"
-            style={inputStyle}
-          />
-        </div>
-
-        <div>
-          <label style={labelStyle}>Thumbnail URL</label>
-          <input
-            type="text"
-            name="thumb"
-            value={form.thumb}
-            onChange={handleChange}
-            placeholder="Thumbnail URL paste করুন, বা নিচে file upload করুন"
-            style={inputStyle}
-          />
-        </div>
-
-        <div>
-          <label style={labelStyle}>Thumbnail File Upload</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setThumbFile(e.target.files[0] || null)}
-            style={inputStyle}
-          />
-        </div>
-
-        <div>
-          <label style={labelStyle}>Hover Image URL</label>
-          <input
-            type="text"
-            name="hoverImg"
-            value={form.hoverImg}
-            onChange={handleChange}
-            placeholder="Hover image URL paste করুন, বা নিচে file upload করুন"
-            style={inputStyle}
-          />
-        </div>
-
-        <div>
-          <label style={labelStyle}>Hover Image File Upload</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setHoverFile(e.target.files[0] || null)}
-            style={inputStyle}
-          />
-        </div>
-
-        {(thumbPreview || hoverPreview) && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "16px",
-            }}
-          >
-            {thumbPreview && (
-              <div>
-                <p style={{ marginBottom: "8px", color: "#bbb" }}>Thumb Preview</p>
-                <img
-                  src={thumbPreview}
-                  alt="thumb preview"
-                  style={{
-                    width: "100%",
-                    height: "180px",
-                    objectFit: "cover",
-                    borderRadius: "12px",
-                    border: "1px solid #333",
-                  }}
-                />
-              </div>
-            )}
-
-            {hoverPreview && (
-              <div>
-                <p style={{ marginBottom: "8px", color: "#bbb" }}>Hover Preview</p>
-                <img
-                  src={hoverPreview}
-                  alt="hover preview"
-                  style={{
-                    width: "100%",
-                    height: "180px",
-                    objectFit: "cover",
-                    borderRadius: "12px",
-                    border: "1px solid #333",
-                  }}
-                />
-              </div>
-            )}
+            <button
+              onClick={handleLogout}
+              className="btn btn-danger"
+            >
+              Sign out
+            </button>
           </div>
-        )}
 
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-          <button
-            type="submit"
-            disabled={saving}
-            style={{
-              ...buttonStyle,
-              background: "#2563eb",
-              color: "#fff",
-            }}
-          >
-            {saving ? "Saving..." : editingId ? "Update Card" : "Add Card"}
-          </button>
+          {message && (
+            <p className="admin-message">{message}</p>
+          )}
 
-          <button
-            type="button"
-            onClick={resetForm}
-            style={{
-              ...buttonStyle,
-              background: "#333",
-              color: "#fff",
-            }}
-          >
-            Reset
-          </button>
+          {/* Add/Edit Form */}
+          {currentPage === "add" && (
+            <form
+              onSubmit={handleSubmit}
+              className="admin-form"
+            >
+              <div className="form-group">
+                <label>Project Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  placeholder="Ki Keno Kivabe"
+                  className="form-input"
+                />
+              </div>
 
-          <button
-            type="button"
-            onClick={fetchProjects}
-            style={{
-              ...buttonStyle,
-              background: "#0f766e",
-              color: "#fff",
-            }}
-          >
-            Reload Cards
-          </button>
-        </div>
-      </form>
+              <div className="form-group">
+                <label>Project Link</label>
+                <input
+                  type="text"
+                  name="link"
+                  value={form.link}
+                  onChange={handleChange}
+                  placeholder="https://example.com"
+                  className="form-input"
+                />
+              </div>
 
-      <div>
-        <h2 style={{ marginBottom: "18px" }}>Existing Portfolio Cards</h2>
+              <div className="form-group">
+                <label>Category</label>
+                <select
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  className="form-select"
+                >
+                  {categoryOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        {loading ? (
-          <p>Loading cards...</p>
-        ) : projects.length === 0 ? (
-          <p>No cards found.</p>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "18px",
-            }}
-          >
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                style={{
-                  background: "#0d0d0d",
-                  border: "1px solid #222",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                }}
-              >
-                {project.thumb && (
-                  <img
-                    src={project.thumb}
-                    alt={project.title}
-                    style={{
-                      width: "100%",
-                      height: "180px",
-                      objectFit: "cover",
-                    }}
-                  />
-                )}
+              <div className="form-group">
+                <label>Order</label>
+                <input
+                  type="number"
+                  name="order"
+                  value={form.order}
+                  onChange={handleChange}
+                  placeholder="0 থেকে শুরু করুন (ছোট নম্বর আগে)"
+                  className="form-input"
+                />
+              </div>
 
-                <div style={{ padding: "16px" }}>
-                  <h3 style={{ marginBottom: "8px" }}>{project.title}</h3>
-                  <p style={{ marginBottom: "8px", color: "#bbb" }}>
-                    Category: {project.category}
-                  </p>
+              <div className="form-group">
+                <label>Thumbnail URL</label>
+                <input
+                  type="text"
+                  name="thumb"
+                  value={form.thumb}
+                  onChange={handleChange}
+                  placeholder="Thumbnail URL paste করুন, বা নিচে file upload করুন"
+                  className="form-input"
+                />
+              </div>
 
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      color: "#60a5fa",
-                      textDecoration: "none",
-                      wordBreak: "break-all",
-                    }}
-                  >
-                    {project.link}
-                  </a>
+              <div className="form-group">
+                <label>Thumbnail File Upload</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setThumbFile(e.target.files[0] || null)}
+                  className="form-input"
+                />
+              </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      marginTop: "16px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <button
-                      onClick={() => handleEdit(project)}
-                      style={{
-                        ...buttonStyle,
-                        background: "#f59e0b",
-                        color: "#111",
-                      }}
-                    >
-                      Edit
-                    </button>
+              <div className="form-group">
+                <label>Hover Image URL</label>
+                <input
+                  type="text"
+                  name="hoverImg"
+                  value={form.hoverImg}
+                  onChange={handleChange}
+                  placeholder="Hover image URL paste করুন, বা নিচে file upload করুন"
+                  className="form-input"
+                />
+              </div>
 
-                    <button
-                      onClick={() => handleDelete(project.id)}
-                      style={{
-                        ...buttonStyle,
-                        background: "#dc2626",
-                        color: "#fff",
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
+              <div className="form-group">
+                <label>Hover Image File Upload</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setHoverFile(e.target.files[0] || null)}
+                  className="form-input"
+                />
+              </div>
+
+              {(thumbPreview || hoverPreview) && (
+                <div className="preview-grid">
+                  {thumbPreview && (
+                    <div className="preview-item">
+                      <p>Thumb Preview</p>
+                      <img
+                        src={thumbPreview}
+                        alt="thumb preview"
+                      />
+                    </div>
+                  )}
+
+                  {hoverPreview && (
+                    <div className="preview-item">
+                      <p>Hover Preview</p>
+                      <img
+                        src={hoverPreview}
+                        alt="hover preview"
+                      />
+                    </div>
+                  )}
                 </div>
+              )}
+
+              <div className="form-button-group">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn btn-primary"
+                >
+                  {saving ? "Saving..." : editingId ? "Update Card" : "Add Card"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="btn btn-secondary"
+                >
+                  Reset
+                </button>
+
+                <button
+                  type="button"
+                  onClick={fetchProjects}
+                  className="btn btn-success"
+                >
+                  Reload Cards
+                </button>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </form>
+          )}
+
+          {/* All Cards View */}
+          {currentPage === "all" && (
+            <div className="admin-projects">
+              {loading ? (
+                <p>Loading cards...</p>
+              ) : projects.length === 0 ? (
+                <p>No cards found.</p>
+              ) : (
+                <div className="cards-grid">
+                  {projects.map((project) => (
+                    <div
+                      key={project.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, project.id)}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, project.id)}
+                      onDragEnd={handleDragEnd}
+                      className={`card ${draggedId === project.id ? "dragging" : ""}`}
+                    >
+                      {project.thumb && (
+                        <img
+                          src={project.thumb}
+                          alt={project.title}
+                          className="card-image"
+                        />
+                      )}
+
+                      <div className="card-content">
+                        <h3 className="card-title">{project.title}</h3>
+                        <p className="card-meta">Drag to reorder • Order: {project.order ?? 0}</p>
+
+                        <p className="card-category">
+                          Category: {project.category}
+                        </p>
+
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="card-link"
+                        >
+                          {project.link}
+                        </a>
+
+                        <div className="card-button-group">
+                          <button
+                            onClick={() => {
+                              handleEdit(project);
+                              setCurrentPage("add");
+                            }}
+                            className="btn btn-warning btn-small"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(project.id)}
+                            className="btn btn-danger btn-small"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="card-icon-group">
+                        <button
+                          onClick={() => handleMoveOrder(project.id, "up")}
+                          className="icon-btn"
+                          title="Move up"
+                        >
+                          ⬆
+                        </button>
+                        <button
+                          onClick={() => handleMoveOrder(project.id, "down")}
+                          className="icon-btn"
+                          title="Move down"
+                        >
+                          ⬇
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

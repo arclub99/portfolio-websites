@@ -54,10 +54,9 @@ const Home = () => {
   return (
     <>
       <div id="Main-title">
-        <h1>Welcome to My Portfolio</h1>
+        <h1>Design. Develop. Deliver. WordPress Excellence.</h1>
         <p>
-          Explore my collection of portfolio websites showcasing my work and
-          projects.
+          From idea to launch — I build clean, responsive, and powerful WordPress websites.
         </p>
       </div>
 
